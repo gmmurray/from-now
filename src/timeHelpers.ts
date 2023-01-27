@@ -49,7 +49,20 @@ export const getTimeDeltaMs = (date: Date, delta: TimeDelta): number => {
   }, 0);
 };
 
+export const subtractTimeDelta = (date: Date, delta: TimeDelta): Date => {
+  return new Date(date.getTime() - getTimeDeltaMs(date, delta));
+};
+
 export const addTimeDelta = (date: Date, delta: TimeDelta): Date => {
-  console.log("calcing");
   return new Date(date.getTime() + getTimeDeltaMs(date, delta));
+};
+
+export const getTimeResult = (
+  fromDate: Date,
+  delta: TimeDelta,
+  isFuture: boolean
+): Date => {
+  return isFuture
+    ? addTimeDelta(fromDate, delta)
+    : subtractTimeDelta(fromDate, delta);
 };

@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import {
   Button,
+  ButtonGroup,
   Col,
   Container,
   FloatingLabel,
@@ -12,7 +13,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { TimeDelta } from "./types/TimeDelta";
-import { addTimeDelta } from "./timeHelpers";
+import { getTimeResult } from "./timeHelpers";
 
 const defaultTimeDelta: TimeDelta = {
   hours: 0,
@@ -23,8 +24,14 @@ const defaultTimeDelta: TimeDelta = {
 };
 
 function App() {
+  const [isFuture, setIsFuture] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [timeDelta, setTimeDelta] = useState(defaultTimeDelta);
+
+  const handleIsFutureChange = useCallback(
+    (newState: boolean) => () => setIsFuture(newState),
+    []
+  );
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentDate(new Date()), 1000);
@@ -40,11 +47,12 @@ function App() {
 
   const handleDeltaReset = useCallback(() => {
     setTimeDelta(defaultTimeDelta);
+    setIsFuture(true);
   }, []);
 
   const resultDate = useMemo(
-    () => addTimeDelta(currentDate, timeDelta),
-    [currentDate, timeDelta]
+    () => getTimeResult(currentDate, timeDelta, isFuture),
+    [currentDate, isFuture, timeDelta]
   );
 
   return (
@@ -58,7 +66,7 @@ function App() {
         <Row>
           <Col>
             <h1 className="display-1 ">from now</h1>
-            <p className="lead ">find a date and time in the future</p>
+            <p className="lead ">find a date and time in the past or future</p>
           </Col>
         </Row>
         <Row>
@@ -77,14 +85,36 @@ function App() {
           ))}
         </Row>
         <Row>
-          <Col xs md={12}>
-            <h2 className="">{resultDate.toLocaleTimeString()}</h2>
-            <h2 className="">{resultDate.toLocaleDateString()}</h2>
+          <Col xs className="text-md-end">
+            <h2>{resultDate.toLocaleTimeString()}</h2>
+            <h2>{resultDate.toLocaleDateString()}</h2>
           </Col>
-          <Col xs md={12}>
-            <Button variant="secondary" onClick={handleDeltaReset}>
-              Reset
-            </Button>
+          <Col xs className="text-start">
+            <div>
+              <ButtonGroup>
+                <Button
+                  variant={isFuture ? "secondary" : "primary"}
+                  onClick={handleIsFutureChange(false)}
+                >
+                  Past
+                </Button>
+                <Button
+                  variant={isFuture ? "primary" : "secondary"}
+                  onClick={handleIsFutureChange(true)}
+                >
+                  Future
+                </Button>
+              </ButtonGroup>
+            </div>
+            <div>
+              <Button
+                variant="warning"
+                onClick={handleDeltaReset}
+                className="mt-2"
+              >
+                Reset
+              </Button>
+            </div>
           </Col>
         </Row>
         <Row></Row>
